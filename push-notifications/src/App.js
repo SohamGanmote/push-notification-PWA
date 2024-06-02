@@ -1,23 +1,34 @@
-// src/App.js
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 function App() {
-	// const baseUrl = process.env.REACT_APP_BASE_URL;
+	const [notificationPermission, setNotificationPermission] = useState(
+		Notification.permission
+	);
+
 	const baseUrl = process.env.REACT_APP_BASE_URL;
 
 	useEffect(() => {
-		if ("serviceWorker" in navigator) {
+		requestNotificationPermission();
+	}, []);
+
+	const requestNotificationPermission = async () => {
+		const permission = await Notification.requestPermission();
+		setNotificationPermission(permission);
+	};
+
+	useEffect(() => {
+		if ("serviceWorker" in navigator && notificationPermission === "granted") {
 			navigator.serviceWorker.ready.then((registration) => {
 				if (registration.pushManager) {
 					registration.pushManager.getSubscription().then((subscription) => {
-						// if (!subscription) {
-						// }
-						registerPush();
+						if (!subscription) {
+							registerPush();
+						}
 					});
 				}
 			});
 		}
-	}, []);
+	}, [notificationPermission]);
 
 	const registerPush = async () => {
 		const registration = await navigator.serviceWorker.ready;
@@ -60,7 +71,9 @@ function App() {
 		<div className="App">
 			<header className="App-header">
 				<h1>React PWA Notification</h1>
-				<button onClick={sendNotification}>Send Notification</button>
+				{notificationPermission === "granted" && (
+					<button onClick={sendNotification}>Send Notification</button>
+				)}
 			</header>
 		</div>
 	);
