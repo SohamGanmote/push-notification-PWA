@@ -2,15 +2,17 @@
 import React, { useEffect } from "react";
 
 function App() {
+	// const baseUrl = process.env.REACT_APP_BASE_URL;
+	const baseUrl = process.env.REACT_APP_BASE_URL;
+
 	useEffect(() => {
 		if ("serviceWorker" in navigator) {
 			navigator.serviceWorker.ready.then((registration) => {
 				if (registration.pushManager) {
 					registration.pushManager.getSubscription().then((subscription) => {
-						if (!subscription) {
-							// No subscription, subscribe the user
-							registerPush();
-						}
+						// if (!subscription) {
+						// }
+						registerPush();
 					});
 				}
 			});
@@ -26,7 +28,7 @@ function App() {
 			),
 		});
 
-		await fetch("http://localhost:8080/subscribe", {
+		await fetch(`${baseUrl}/subscribe`, {
 			method: "POST",
 			body: JSON.stringify(subscription),
 			headers: {
@@ -49,7 +51,7 @@ function App() {
 	};
 
 	const sendNotification = async () => {
-		await fetch("http://localhost:8080/sendNotification", {
+		await fetch(`${baseUrl}/sendNotification`, {
 			method: "POST",
 		});
 	};
