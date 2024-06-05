@@ -87,6 +87,7 @@ function App() {
 					<button onClick={sendNotification}>Send Notification</button>
 				)}
 			</header>
+			<div>Your Device Id : {uniqueDeviceId}</div>
 		</div>
 	);
 }
