@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
 
+function createRandomId() {
+	const chars =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	let result = "";
+	for (let i = 0; i < 4; i++) {
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return result;
+}
+
 function App() {
 	const [notificationPermission, setNotificationPermission] = useState(
 		Notification.permission
 	);
+
+	const uniqueDeviceId = createRandomId();
 
 	const baseUrl = process.env.REACT_APP_BASE_URL;
 
@@ -41,7 +53,7 @@ function App() {
 
 		await fetch(`${baseUrl}/subscribe`, {
 			method: "POST",
-			body: JSON.stringify(subscription),
+			body: JSON.stringify({ subscription, userIdentifier: uniqueDeviceId }),
 			headers: {
 				"Content-Type": "application/json",
 			},

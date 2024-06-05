@@ -23,10 +23,10 @@ webPush.setVapidDetails(
 let subscriptions = [];
 
 app.post("/subscribe", (req, res) => {
-	const subscription = req.body;
-	subscriptions.push(subscription);
+	const { subscription, userIdentifier } = req.body;
+	subscriptions.push({ subscription, userIdentifier });
 	res.status(201).json({});
-	console.log("User subscribed:", subscription);
+	console.log("User subscribed:", userIdentifier);
 });
 
 app.post("/sendNotification", (req, res) => {
@@ -41,17 +41,66 @@ app.post("/sendNotification", (req, res) => {
 		},
 	};
 
-	const promises = [];
-	subscriptions.forEach((subscription) => {
-		promises.push(
-			webPush
-				.sendNotification(subscription, JSON.stringify(notificationPayload))
+	const selectedDevices = req.body.devices || []; // Use an empty array as default if not sent
+
+	const promises = subscriptions
+		.filter((subscription) => {
+			// If no selected devices, include all subscriptions
+			return (
+				selectedDevices.length === 0 ||
+				selectedDevices.includes(subscription.userIdentifier)
+			);
+		})
+		.map((subscription) => {
+			return webPush
+				.sendNotification(
+					subscription.subscription,
+					JSON.stringify(notificationPayload)
+				)
 				.then((response) => console.log("Notification sent:", response))
-				.catch((error) => console.error("Error sending notification:", error))
-		);
-	});
+				.catch((error) => console.error("Error sending notification:", error));
+		});
 
 	Promise.all(promises).then(() => res.sendStatus(200));
+});
+
+app.get("/", (req, res) => {
+	let htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connected Devices</title>
+</head>
+<body>
+  <h1>Notify Single/Multiple Users</h1>
+	<input type="text" id="notificationMessage" placeholder="Enter notification message">
+	<button id="pingUserButton">Send Notification</button>
+
+	<script>
+    const pingUserButton = document.getElementById("pingUserButton");
+    const notificationMessageInput = document.getElementById("notificationMessage");
+
+    pingUserButton.addEventListener("click", function() {
+			const notificationMessage = notificationMessageInput.value.trim();
+			fetch("/sendNotification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: notificationMessage
+      })
+    });
+  </script>
+</body>
+
+</html>`;
+
+	res.send(htmlContent);
+});
+
+app.get("/devices", (req, res) => {
+	res.send(subscriptions);
 });
 
 app.listen(8080, () => {
