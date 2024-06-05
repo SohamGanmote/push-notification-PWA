@@ -42,7 +42,6 @@ app.post("/sendNotification", (req, res) => {
 	};
 
 	const selectedDevices = req.body.devices || []; // Use an empty array as default if not sent
-	console.log("req.body : ", selectedDevices);
 
 	const promises = subscriptions
 		.filter((subscription) => {
@@ -77,10 +76,11 @@ app.get("/", (req, res) => {
   <h1>Notify Single/Multiple Users</h1>
 	<input type="text" id="notificationMessage" placeholder="Enter notification message">
 	<button id="pingUserButton">Send Notification</button>
-
+	<button id="reset">Reset Subscriptions</button>
 	<script>
     const pingUserButton = document.getElementById("pingUserButton");
     const notificationMessageInput = document.getElementById("notificationMessage");
+    const resetButton = document.getElementById("reset");
 
     pingUserButton.addEventListener("click", function() {
 			const notificationMessage = notificationMessageInput.value.trim();
@@ -92,12 +92,21 @@ app.get("/", (req, res) => {
         body: JSON.stringify({devices:notificationMessage})
       })
     });
+
+		resetButton.addEventListener("click", function() {
+			fetch("/reset")
+		})
   </script>
 </body>
 
 </html>`;
 
 	res.send(htmlContent);
+});
+
+app.get("/reset", (req, res) => {
+	subscriptions = [];
+	res.send(subscriptions);
 });
 
 app.get("/devices", (req, res) => {
