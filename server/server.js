@@ -42,6 +42,7 @@ app.post("/sendNotification", (req, res) => {
 	};
 
 	const selectedDevices = req.body.devices || []; // Use an empty array as default if not sent
+	console.log("req.body : ", selectedDevices);
 
 	const promises = subscriptions
 		.filter((subscription) => {
@@ -88,7 +89,7 @@ app.get("/", (req, res) => {
         headers: {
           "Content-Type": "application/json"
         },
-        body: notificationMessage
+        body: JSON.stringify({devices:notificationMessage})
       })
     });
   </script>
