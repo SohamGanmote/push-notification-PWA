@@ -30,17 +30,6 @@ app.post("/subscribe", (req, res) => {
 });
 
 app.post("/sendNotification", (req, res) => {
-	const notificationPayload = {
-		notification: {
-			title: "React PWA Notification",
-			body: "This is a notification from your PWA!",
-			icon: "path_to_icon/icon.png",
-			data: {
-				url: "https://www.example.com", // URL to open on click
-			},
-		},
-	};
-
 	const selectedDevices = req.body.devices || []; // Use an empty array as default if not sent
 
 	const promises = subscriptions
@@ -52,6 +41,19 @@ app.post("/sendNotification", (req, res) => {
 			);
 		})
 		.map((subscription) => {
+			const date = new Date();
+
+			const notificationPayload = {
+				notification: {
+					title: `Hello ${subscription.userIdentifier}`,
+					body: `Today's date : ${date}`,
+					icon: "path_to_icon/icon.png",
+					data: {
+						url: "https://www.example.com", // URL to open on click
+					},
+				},
+			};
+
 			return webPush
 				.sendNotification(
 					subscription.subscription,
